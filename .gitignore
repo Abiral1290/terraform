@@ -1,0 +1,14 @@
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+tfplan
+*.tfvars
+
+# Mac
+.DS_Store
+
+# Credentials — never commit these
+*.pem
+*.key
