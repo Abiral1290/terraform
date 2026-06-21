@@ -23,7 +23,7 @@ phases:
     commands:
       - echo "Building React app..."
       - cd website
-      - npm ci
+      - npm install
       - npm run build
       - echo "Building Docker image..."
       - docker build -t myapp-website .
