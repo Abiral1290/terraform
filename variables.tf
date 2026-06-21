@@ -19,7 +19,7 @@ variable "aws_region" {
 variable "github_repo" {
   description = "GitHub repo in format owner/repo-name"
   type        = string
-  default     = "https://github.com/Abiral1290?tab=repositories"
+  default     = "Abiral1290/terraform"
 }
 
 variable "github_branch" {
