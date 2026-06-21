@@ -63,6 +63,7 @@ resource "aws_codebuild_project" "app" {
     compute_type                = "BUILD_GENERAL1_SMALL"
     image                       = "aws/codebuild/standard:7.0"
     type                        = "LINUX_CONTAINER"
+    privileged_mode             = true
     image_pull_credentials_type = "CODEBUILD"
 
     environment_variable {
@@ -84,12 +85,6 @@ resource "aws_codebuild_project" "app" {
   source {
     type      = "CODEPIPELINE"
     buildspec = "buildspec.yml"
-  }
-
-  vpc_config {
-    vpc_id             = aws_vpc.main.id
-    subnets            = [aws_subnet.private_a.id, aws_subnet.private_b.id]
-    security_group_ids = [aws_security_group.app.id]
   }
 
   logs_config {
