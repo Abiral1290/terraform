@@ -13,33 +13,38 @@ phases:
 
   pre_build:
     commands:
-      - echo "Configuring AWS credentials..."
-      - aws sts get-caller-identity
+      - echo "Logging in to ECR..."
+      - aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 362857715742.dkr.ecr.eu-west-2.amazonaws.com
       - echo "Initialising Terraform..."
-      - cd terraform
       - terraform init
-      - echo "Running Terraform validate..."
       - terraform validate
 
   build:
     commands:
-      - echo "Running Terraform plan..."
-      - terraform plan -out=tfplan
+      - echo "Building React app..."
+      - cd website
+      - npm install
+      - npm run build
+      - echo "Building Docker image..."
+      - docker build -t myapp-website .
+      - docker tag myapp-website:latest 362857715742.dkr.ecr.eu-west-2.amazonaws.com/myapp-website:latest
+      - echo "Pushing to ECR..."
+      - docker push 362857715742.dkr.ecr.eu-west-2.amazonaws.com/myapp-website:latest
+      - cd ..
       - |
         if [ "$ACTION" = "apply" ]; then
-          echo "Running Terraform apply..."
-          terraform apply -auto-approve tfplan
+          terraform apply -auto-approve
         else
-          echo "Plan complete — waiting for approval..."
+          terraform plan
         fi
 
   post_build:
     commands:
-      - echo "Build completed on $(date)"
-      - terraform output
+      - echo "Forcing ECS redeployment..."
+      - aws ecs update-service --cluster myapp-cluster --service myapp-service --force-new-deployment --region eu-west-2
+      - echo "Deployment complete!"
 
 artifacts:
   files:
-    - terraform/tfplan
-    - terraform/**/*
+    - "**/*"
   discard-paths: no
