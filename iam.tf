@@ -1,7 +1,6 @@
 # ─── CODEPIPELINE ROLE ─────────────────────────────────────────────────
 resource "aws_iam_role" "codepipeline" {
   name = "${var.app_name}-codepipeline-role"
-
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -15,7 +14,6 @@ resource "aws_iam_role" "codepipeline" {
 resource "aws_iam_role_policy" "codepipeline" {
   name = "${var.app_name}-codepipeline-policy"
   role = aws_iam_role.codepipeline.id
-
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -42,16 +40,12 @@ resource "aws_iam_role_policy" "codepipeline" {
       },
       {
         Effect = "Allow"
-        Action = [
-          "codestar-connections:UseConnection"
-        ]
+        Action = ["codestar-connections:UseConnection"]
         Resource = "*"
       },
       {
         Effect = "Allow"
-        Action = [
-          "sns:Publish"
-        ]
+        Action = ["sns:Publish"]
         Resource = "*"
       }
     ]
@@ -61,7 +55,6 @@ resource "aws_iam_role_policy" "codepipeline" {
 # ─── CODEBUILD ROLE ────────────────────────────────────────────────────
 resource "aws_iam_role" "codebuild" {
   name = "${var.app_name}-codebuild-role"
-
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -75,7 +68,6 @@ resource "aws_iam_role" "codebuild" {
 resource "aws_iam_role_policy" "codebuild" {
   name = "${var.app_name}-codebuild-policy"
   role = aws_iam_role.codebuild.id
-
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -93,12 +85,26 @@ resource "aws_iam_role_policy" "codebuild" {
         Action = [
           "s3:GetObject",
           "s3:GetObjectVersion",
-          "s3:PutObject"
+          "s3:PutObject",
+          "s3:*"
         ]
-        Resource = [
-          "arn:aws:s3:::${var.app_name}-pipeline-artifacts-362857715742",
-          "arn:aws:s3:::${var.app_name}-pipeline-artifacts-362857715742/*"
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+          "ecr:PutImage",
+          "ecr:CreateRepository",
+          "ecr:DescribeRepositories"
         ]
+        Resource = "*"
       },
       {
         Effect = "Allow"
@@ -123,12 +129,12 @@ resource "aws_iam_role_policy" "codebuild" {
       {
         Effect = "Allow"
         Action = [
-          "terraform:*",
           "iam:*",
-          "s3:*",
           "ec2:*",
           "ecs:*",
-          "dynamodb:*"
+          "dynamodb:*",
+          "elasticloadbalancing:*",
+          "cloudwatch:*"
         ]
         Resource = "*"
       }
