@@ -23,7 +23,8 @@ phases:
     commands:
       - echo "Building React app..."
       - cd website
-      - npm install
+      - rm -rf node_modules
+      - npm install --legacy-peer-deps
       - npm run build
       - echo "Building Docker image..."
       - docker build -t myapp-website .
@@ -31,12 +32,7 @@ phases:
       - echo "Pushing to ECR..."
       - docker push 362857715742.dkr.ecr.eu-west-2.amazonaws.com/myapp-website:latest
       - cd ..
-      - |
-        if [ "$ACTION" = "apply" ]; then
-          terraform apply -auto-approve
-        else
-          terraform plan
-        fi
+      - terraform plan
 
   post_build:
     commands:
