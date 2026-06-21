@@ -120,6 +120,38 @@ resource "aws_security_group" "app" {
   }
 }
 
+# ─── ECR VPC ENDPOINTS (allows private subnets to reach ECR) ───────────
+resource "aws_vpc_endpoint" "ecr_api" {
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.eu-west-2.ecr.api"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+  security_group_ids  = [aws_security_group.app.id]
+  private_dns_enabled = true
+
+  tags = { Name = "${var.app_name}-ecr-api-endpoint" }
+}
+
+resource "aws_vpc_endpoint" "ecr_dkr" {
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.eu-west-2.ecr.dkr"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+  security_group_ids  = [aws_security_group.app.id]
+  private_dns_enabled = true
+
+  tags = { Name = "${var.app_name}-ecr-dkr-endpoint" }
+}
+
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.eu-west-2.s3"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids   = [aws_route_table.public.id]
+
+  tags = { Name = "${var.app_name}-s3-endpoint" }
+}
+
 # ─── OUTPUTS (other .tf files reference these) ─────────────────────────
 output "vpc_id" {
   value = aws_vpc.main.id
